@@ -23,6 +23,9 @@ var SIZES = {
 };
 */
 
+var DOWNLOAD = (image) => `http://seiyria.com/gameicons-font/png/${image}.png`;
+var DOWNLOAD_PATH = (image) => `./png/${image}.png`
+
 var SIZES = {
     WIDTH: 6.4,
     HEIGHT: 9.0 //should be 8.7, but eh - 9.0 fits better in sleeves (and doesn't cut off)
@@ -31,7 +34,7 @@ var SIZES = {
 var PROCESS_SHEETS = ['DM', 'Cleric', 'Mage', 'Thief', 'Warrior',/*'Ranger', 'Merchant', 'Monk', 'Alchemist', */ 'Item', 'Relic', 'Trap'];
 
 var outputtedCode = `
-PAGE=21, 29.7, "PORTRAIT", HV
+PAGE=21.6, 29.7, "PORTRAIT", HV
 DPI=300
 CARDSIZE=${SIZES.WIDTH}, ${SIZES.HEIGHT}
 MARGINS=0.45, 0.45, 0.45, 0.45
@@ -41,12 +44,13 @@ BORDER=rectangle,#000000,0.1,MARK
 [CardFont] = "Arial"
 [CardFlags] = TNF
 
-[TitleFont] = [CardFont], 18, [CardFlags], #000000
-[TextFont] = [CardFont], 10, [CardFlags], #000000
-[SubtitleFont] = [CardFont], 12, [CardFlags], #000000
-[SubtextFont] = [CardFont], 10, [CardFlags], #000000
-[SubsubtextFont] = [CardFont], 10, [CardFlags], #000000
-[ValueFont] = [CardFont], 10, [CardFlags], #ffffff
+[TitleFont] = [CardFont], 12.5, [CardFlags], #000000
+[TextFont] = [CardFont], 6, [CardFlags], #000000
+[SubtitleFont] = [CardFont], 10, [CardFlags], #000000
+[SubtextFont] = [CardFont], 6, [CardFlags], #000000
+[SubsubtextFont] = [CardFont], 6, [CardFlags], #000000
+[ValueFont] = [CardFont], 8, [CardFlags], #ffffff
+htmlfont=description, Arial, 8, , #000000
 `;
 
 var addLine = (outputtedCode, line) => {
@@ -55,11 +59,14 @@ var addLine = (outputtedCode, line) => {
 
 var processRow = (title, rowData, metadata) => {
     var cards = [];
-    for(var i = 0; i < (rowData.quantity || 0); i++) {
+    if(!rowData.quantity) return cards;
+    for(var i = 0; i < rowData.quantity; i++) {
         cards.push({
             cardClass: title,
             name: rowData.name,
             subtitle: rowData.subtitle,
+            primaryImage: rowData.primaryimage,
+            secondaryImage: rowData.secondaryimage,
             value: rowData.value,
             trigger: rowData.trigger,
             target: rowData.target,
@@ -92,38 +99,48 @@ var tplFromCard = (card, index) => {
     };
 
     const textHeight = card.subtext ? 3 : 6;
-    const cardTextStart = card.trigger || card.target ? 3 : 2;
+    const cardTextStart = 3.5;
+
+    var image = `
+download="${DOWNLOAD(card.secondaryImage)}","${DOWNLOAD_PATH(card.secondaryImage)}"
+image=${index}, "${DOWNLOAD_PATH(card.secondaryImage)}", 0.5, 0.5, 2, 2
+`;
 
     var base = `
+
 font=[TitleFont]
-text=${index}, "${card.name}", 0, 0, 6.4, 1, "center", "center"
+text=${index}, "${card.name}", 0, 0, 6, 1, "right", "center"
 
 font=[SubtitleFont]
-text=${index}, "${cardSubtitle(card.subtitle)}", 0, 1, 6.4, 1, "center", "top"
+text=${index}, "${cardSubtitle(card.subtitle)}", 0, 1, 6, 0.5, "right", "top"
 
 font=[SubsubtextFont]
-text=${index}, "${card.trigger}", 0, 2, 3.2, 1, "center", "top"
+text=${index}, "${card.trigger}", 4.6, 1.5, 1.4, 0.5, "right", "center"
 
 font=[SubsubtextFont]
-text=${index}, "${card.target}", 3.2, 2, 3.2, 1, "center", "top"
+text=${index}, "${card.target}", 4.6, 2, 1.4, 0.5, "right", "top"
 
-font=[TextFont]
-htmltext=${index}, "${card.text.split('\n').join('<br>')}", 0.8, ${cardTextStart}, 4.8, ${textHeight}
+htmlfont=[TextFont]
+htmltext=${index}, "<description>${card.text.split('\n').join('<br>')}</description>", 0.8, ${cardTextStart}, 4.8, ${textHeight}
 
 font=[SubtextFont]
-text=${index}, "${card.subtext}", 0.8, 6, 4.8, 3, "left", "wordwrap"
+text=${index}, "${card.subtext}", 0.8, 6.5, 4.8, 2.5, "left", "wordwrap"
 `;
 
     const revision = `
 font=[SubtextFont]
-text=${index}, "Revision ${card.revision}", 0.5, 8.5, 1, 0.5, "center", "center"
+text=${index}, "Revision ${card.revision}", 0.2, 8.5, 1, 0.5, "center", "center"
 `
 
     const value = `
 font=[ValueFont]
-ELLIPSE=${index}, 5, 8.5, 1, 0.5, #000000
-text=${index}, "${card.value}", 5, 8.5, 1, 0.5, "center", "center"
+ELLIPSE=${index}, 5, 8.25, 1, 0.5, #000000
+text=${index}, "${card.value}", 5, 8.25, 1, 0.5, "center", "center"
 `;
+
+    if(card.secondaryImage) {
+        base = image + base;
+    }
 
     if(card.revision) {
         base = base + revision;
@@ -145,9 +162,12 @@ var cardBackingDisplay = (text) => {
 }
 
 var backFromCard = (card, index) => {
+
+    if(!card.primaryImage) return '';
+
     var base = `
-font=[TitleFont]
-text=${index}, "${cardBackingDisplay(card.text)}", 0, 0, 6.4, 6.4, "center", "center"
+download="${DOWNLOAD(card.primaryImage)}","${DOWNLOAD_PATH(card.primaryImage)}"
+image=${index}, "${DOWNLOAD_PATH(card.primaryImage)}", 1.2, 2, 4, 5
     `;
 
     const subClassText = `

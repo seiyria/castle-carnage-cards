@@ -2,8 +2,8 @@
 var fs = require('fs');
 var _ = require('lodash');
 
-var translateColor = (color) => ({ r: 'Red', g: 'Green', b: 'Blue' }[color]);
-var translateText  = (color) => ({ r: 'v', g: '^', b: '?' }[color]);
+var translateColor = (color) => ({ r: 'Red', g: 'Green'}[color]);
+var translateText  = (color) => ({ r: 'v', g: '^' }[color]);
 
 var COLORS = {
   r: '#ff0000',
@@ -33,14 +33,15 @@ BORDER=MARK
 `;
 
 var COUNTS = {
-  deadEnd:  { tile: 4,  distributions: { r: 0, b: 0, rb: 4, rg: 0, rgb: 0 } },
-  hallway:  { tile: 10, distributions: { r: 2, b: 2, rb: 2, rg: 2, rgb: 2 } },
-  elbow:    { tile: 14, distributions: { r: 2, b: 3, rb: 4, rg: 2, rgb: 3 } },
-  threeWay: { tile: 14, distributions: { r: 2, b: 3, rb: 4, rg: 2, rgb: 3 } },
-  fourWay:  { tile: 14, distributions: { r: 2, b: 3, rb: 4, rg: 2, rgb: 3 } }
+  deadEnd:  { tile: 4,  distributions: { r: 4, b: 0, g: 0 } },
+  hallway:  { tile: 10, distributions: { r: 4, b: 3, g: 3 } },
+  elbow:    { tile: 14, distributions: { r: 6, b: 3, g: 5 } },
+  threeWay: { tile: 14, distributions: { r: 7, b: 4, g: 3 } },
+  fourWay:  { tile: 14, distributions: { r: 6, b: 4, g: 4 } }
 };
 
 var addColor = (index, color) => {
+  if(color === 'b') return;
   var TEXT_HEIGHT = 0.3;
 
   return _.map(color.split(''), (color, offset) => {
@@ -98,7 +99,7 @@ line=${index}, [Second], [Second], [Second], [Max],    [Color], [Thickness]
 
 var curTile = 1;
 _.each(['deadEnd', 'hallway', 'elbow', 'threeWay', 'fourWay'], type => {
-  _.each(['r', 'b', 'rg', 'rb', 'rgb'], colors => {
+  _.each(['r', 'g', 'b'], colors => {
     for(var i = 0; i < COUNTS[type].distributions[colors]; i++) {
       var base = PATTERNS[type](curTile);
       base += addColor(curTile, colors);

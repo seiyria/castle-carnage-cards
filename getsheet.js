@@ -25,13 +25,13 @@ var writeCards = (cards) => {
 
 var splitCardsAndGetBacks = (cards) => {
     return _(cards)
-        .chunk(9)
+        .chunk(12)
         .map(chunk => {
             const miniChunks = _.chunk(chunk, 3);
             const emptyCard = { name: '', subtitle: '', trigger: '', target: '', text: '', subtext: '',
             value: '', cardClass: '', primaryImage: '', secondaryImage: '' };
 
-            while(miniChunks.length < 3) miniChunks.push([emptyCard, emptyCard, emptyCard]);
+            while(miniChunks.length < 4) miniChunks.push([emptyCard, emptyCard, emptyCard]);
 
             _.each(miniChunks, miniChunk => {
                 while(miniChunk.length < 3) miniChunk.push(emptyCard);
@@ -76,8 +76,8 @@ doc.useServiceAccountAuth(creds, () => {
                 const cards = _(data).compact().flattenDeep().value();
 
                 console.info(`Total cards: ${cards.length}.`);
-                if(cards.length % 9 !== 0) {
-                    console.warn(`Warning: card count not divisible by 9.`);
+                if(cards.length % 12 !== 0) {
+                    console.warn(`Warning: card count not divisible by 12.`);
                 }
 
                 writeCards(splitCardsAndGetBacks(cards));

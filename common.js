@@ -11,9 +11,10 @@ var COLORS = {
     Merchant:   '#000000', //TODO
     Alchemist:  '#000000', //TODO
     Monk:       '#000000', //TODO
+    Boss:       '#000000', //TODO
     Item:       '#CC8400',
     Relic:      '#49311C',
-    Trap:       '#49311C'
+    Dungeon:    '#49311C'
 };
 
 /* // used for sending to TheGameCrafter
@@ -28,10 +29,10 @@ var DOWNLOAD_PATH = (image) => `./png/${image}.png`
 
 var SIZES = {
     WIDTH: 6.4,
-    HEIGHT: 9.0 //should be 8.7, but eh - 9.0 fits better in sleeves (and doesn't cut off)
+    HEIGHT: 6.4 //should be 8.7, but eh - 9.0 fits better in sleeves (and doesn't cut off)
 };
 
-var PROCESS_SHEETS = ['DM', 'Cleric', 'Mage', 'Thief', 'Warrior',/*'Ranger', 'Merchant', 'Monk', 'Alchemist', */ 'Item', 'Relic', 'Trap'];
+var PROCESS_SHEETS = ['DM', 'Cleric', 'Mage', 'Thief', 'Warrior',/*'Ranger', 'Merchant', 'Monk', 'Alchemist', */ 'Item', 'Relic', 'Dungeon', 'Boss'];
 
 var outputtedCode = `
 PAGE=21.6, 29.7, "PORTRAIT", HV
@@ -98,12 +99,12 @@ var tplFromCard = (card, index) => {
         return subtitle;
     };
 
-    const textHeight = card.subtext ? 3 : 6;
-    const cardTextStart = 3.5;
+    const textHeight = card.subtext ? 2.5 : 4.5;
+    const cardTextStart = 2.5;
 
     var image = `
 download="${DOWNLOAD(card.secondaryImage)}","${DOWNLOAD_PATH(card.secondaryImage)}"
-image=${index}, "${DOWNLOAD_PATH(card.secondaryImage)}", 0.5, 0.5, 2, 2
+image=${index}, "${DOWNLOAD_PATH(card.secondaryImage)}", 0.5, 0.5, 1.5, 1.5
 `;
 
     var base = `
@@ -124,18 +125,18 @@ htmlfont=[TextFont]
 htmltext=${index}, "<description>${card.text.split('\n').join('<br>')}</description>", 0.8, ${cardTextStart}, 4.8, ${textHeight}
 
 font=[SubtextFont]
-text=${index}, "${card.subtext}", 0.8, 6.5, 4.8, 2.5, "left", "wordwrap"
+text=${index}, "${card.subtext}", 0.8, ${SIZES.HEIGHT - 1.5}, 4.8, 2.5, "left", "wordwrap"
 `;
 
     const revision = `
 font=[SubtextFont]
-text=${index}, "Revision ${card.revision}", 0.2, 8.5, 1, 0.5, "center", "center"
+text=${index}, "Revision ${card.revision}", 0.2, ${SIZES.HEIGHT - 0.5}, 1, 0.5, "center", "center"
 `
 
     const value = `
 font=[ValueFont]
-ELLIPSE=${index}, 5, 8.25, 1, 0.5, #000000
-text=${index}, "${card.value}", 5, 8.25, 1, 0.5, "center", "center"
+ELLIPSE=${index}, 5, ${SIZES.HEIGHT - 0.75}, 1, 0.5, #000000
+text=${index}, "${card.value}", 5, ${SIZES.HEIGHT - 0.75}, 1, 0.5, "center", "center"
 `;
 
     if(card.secondaryImage) {
@@ -167,12 +168,12 @@ var backFromCard = (card, index) => {
 
     var base = `
 download="${DOWNLOAD(card.primaryImage)}","${DOWNLOAD_PATH(card.primaryImage)}"
-image=${index}, "${DOWNLOAD_PATH(card.primaryImage)}", 1.2, 2, 4, 5
+image=${index}, "${DOWNLOAD_PATH(card.primaryImage)}", 1.25, 1.25, 3.75, 3.75
     `;
 
     const subClassText = `
 font=[TitleFont]
-text=${index}, "Class Card", 0, 6.4, 6.4, 2.8, "center", "center"
+text=${index}, "Class Card", 0, 4, 6.4, 2.8, "center", "center"
     `;
 
     if(card.showClassSubtitle) {
